@@ -96,11 +96,11 @@
                 app:layout_constraintTop_toBottomOf="@id/toLayout">
 
                 <EditText
-                    android:id="@+id/amountUSD"
+                    android:id="@+id/amountHUSH"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:hint="$ 0.00"
+                    android:hint="0.00 HUSH"
                     android:inputType="numberDecimal"
                     android:maxLength="14"
                     android:selectAllOnFocus="true"
@@ -108,21 +108,21 @@
                     android:textAlignment="center"
                     android:textColor="#FFFFFF"
                     android:textSize="36sp"
-                    app:layout_constraintBottom_toTopOf="@+id/amountHUSH"
+                    app:layout_constraintBottom_toTopOf="@+id/amountUSD"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/amountHUSH"
+                    android:id="@+id/amountUSD"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:text="HUSH 0.0"
+                    android:text="0.0 $"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/amountUSD" />
+                    app:layout_constraintTop_toBottomOf="@+id/amountHUSH" />
 
                 <TextView
                     android:id="@+id/textView8"
@@ -139,12 +139,12 @@
                     android:id="@+id/txtSendCurrencySymbol"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="26dp"
-                    android:text="$"
+                    android:text="HUSH"
                     android:textColor="#FFFFFF"
                     android:textSize="36sp"
-                    app:layout_constraintEnd_toStartOf="@+id/amountUSD"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    tools:layout_editor_absoluteX="282dp"
+                    tools:layout_editor_absoluteY="27dp" />
+
             </android.support.constraint.ConstraintLayout>
             <android.support.constraint.ConstraintLayout
                     android:layout_width="match_parent"
@@ -192,6 +192,7 @@
                         android:id="@+id/txtMemoSize" android:layout_marginEnd="8dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintBaseline_toBaselineOf="@+id/txtSendMemoTitle"/>
+
             </android.support.constraint.ConstraintLayout>
             <Button
                     android:text="Send"

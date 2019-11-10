@@ -43,17 +43,19 @@ class SendActivity : AppCompatActivity() {
             sendAddress.setText(intent.getStringExtra("address"), TextView.BufferType.EDITABLE)
 
         if (intent.getDoubleExtra("amount", -1.0) > 0)
-            setAmountUSD(intent.getDoubleExtra("amount", 0.0))
+            setAmountHush(intent.getDoubleExtra("amount", 0.0))
 
         if (intent.getBooleanExtra("includeReplyTo", false))
             chkIncludeReplyTo.isChecked = true
 
         imageButton.setOnClickListener { view ->
             val intent = Intent(this, QrReaderActivity::class.java)
-            intent.putExtra("REQUEST_CODE",
+            intent.putExtra(
+                "REQUEST_CODE",
                 QrReaderActivity.REQUEST_ADDRESS
             )
-            startActivityForResult(intent,
+            startActivityForResult(
+                intent,
                 QrReaderActivity.REQUEST_ADDRESS
             )
         }
@@ -66,19 +68,27 @@ class SendActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (DataModel.isValidAddress(s.toString())) {
                     txtValidAddress.text = "\u2713 Valid address"
-                    txtValidAddress.setTextColor(ContextCompat.getColor(applicationContext,
-                        R.color.white_selected
-                    ))
+                    txtValidAddress.setTextColor(
+                        ContextCompat.getColor(
+                            applicationContext,
+                            R.color.white_selected
+                        )
+                    )
                 } else {
                     txtValidAddress.text = "Not a valid Hush address!"
-                    txtValidAddress.setTextColor(ContextCompat.getColor(applicationContext, R.color.colorAccent))
+                    txtValidAddress.setTextColor(
+                        ContextCompat.getColor(
+                            applicationContext,
+                            R.color.colorAccent
+                        )
+                    )
                 }
 
                 if (s?.startsWith("R") == true) {
-                    txtSendMemo.isEnabled       = false
+                    txtSendMemo.isEnabled = false
                     chkIncludeReplyTo.isEnabled = false
-                    txtSendMemo.text            = SpannableStringBuilder("")
-                    txtSendMemoTitle.text       = "(No Memo for t-Addresses)"
+                    txtSendMemo.text = SpannableStringBuilder("")
+                    txtSendMemoTitle.text = "(No Memo for t-Addresses)"
                 } else {
                     txtSendMemo.isEnabled = true
                     chkIncludeReplyTo.isEnabled = true
@@ -87,7 +97,7 @@ class SendActivity : AppCompatActivity() {
             }
         })
 
-        amountUSD.addTextChangedListener(object : TextWatcher {
+        amountHUSH.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {}
 
@@ -99,14 +109,16 @@ class SendActivity : AppCompatActivity() {
                 if (usd == null) {
                     txtSendCurrencySymbol.text = "" // Let the placeholder show the "$" sign
                 } else {
-                    txtSendCurrencySymbol.text = "$"
+                    txtSendCurrencySymbol.text = "HUSH"
                 }
 
                 if (usd == null || zprice == null)
-                    amountHUSH.text = "${DataModel.mainResponseData?.tokenName} 0.0"
-                else
-                    amountHUSH.text =
-                        "${DataModel.mainResponseData?.tokenName} " + DecimalFormat("#.########").format(usd / zprice)
+
+                    amountUSD.text = "$ 0.0"
+                else {
+                    amountUSD.text =
+                        "$" + DecimalFormat("#.##").format(usd * zprice)
+                }
             }
         })
 
@@ -120,13 +132,19 @@ class SendActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 txtMemoSize.text = "${s?.length ?: 0} / 512"
                 if (s?.length ?: 0 > 512) {
-                    txtMemoSize.setTextColor(ContextCompat.getColor(applicationContext,
-                        R.color.colorAccent
-                    ))
+                    txtMemoSize.setTextColor(
+                        ContextCompat.getColor(
+                            applicationContext,
+                            R.color.colorAccent
+                        )
+                    )
                 } else {
-                    txtMemoSize.setTextColor(ContextCompat.getColor(applicationContext,
-                        R.color.white_selected
-                    ))
+                    txtMemoSize.setTextColor(
+                        ContextCompat.getColor(
+                            applicationContext,
+                            R.color.white_selected
+                        )
+                    )
                 }
             }
         })
@@ -136,7 +154,8 @@ class SendActivity : AppCompatActivity() {
         }
     }
 
-    private fun doValidationsThenConfirm()  {
+
+    private fun doValidationsThenConfirm() {
         // First, check if the address is correct.
         val toAddr = sendAddress.text.toString()
         if (!DataModel.isValidAddress(toAddr)) {
@@ -146,10 +165,11 @@ class SendActivity : AppCompatActivity() {
 
         // Then if the amount is valid
         val amt = amountHUSH.text.toString()
-        val parsedAmt = amt.substring("${DataModel.mainResponseData?.tokenName} ".length, amt.length)
+        val parsedAmt =
+            amt.substring("${DataModel.mainResponseData?.tokenName} ".length, amt.length)
 
         // amount=0 xtns are valid
-        if (parsedAmt.toDoubleOrNull() == null || parsedAmt.toDouble() < 0.0 ) {
+        if (parsedAmt.toDoubleOrNull() == null || parsedAmt.toDouble() < 0.0) {
             showErrorDialog("Invalid amount!")
             return
         }
@@ -159,13 +179,16 @@ class SendActivity : AppCompatActivity() {
         // Check if this is more than the maxzspendable
         if (DataModel.mainResponseData?.maxzspendable != null) {
             if (parsedAmt.toDouble() > DataModel.mainResponseData?.maxzspendable!! &&
-                parsedAmt.toDouble() <= DataModel.mainResponseData?.maxspendable ?: Double.MAX_VALUE) {
+                parsedAmt.toDouble() <= DataModel.mainResponseData?.maxspendable ?: Double.MAX_VALUE
+            ) {
 
                 val alertDialog = AlertDialog.Builder(this@SendActivity)
                 alertDialog.setTitle("Send from t-addr?")
-                alertDialog.setMessage("${DataModel.mainResponseData?.tokenName} $parsedAmt is more than the balance in " +
-                        "your shielded address. This Tx will have to be sent from a transparent address, and will" +
-                        " not be private.\n\nAre you absolutely sure?")
+                alertDialog.setMessage(
+                    "${DataModel.mainResponseData?.tokenName} $parsedAmt is more than the balance in " +
+                            "your shielded address. This Tx will have to be sent from a transparent address, and will" +
+                            " not be private.\n\nAre you absolutely sure?"
+                )
                 alertDialog.apply {
                     setPositiveButton("Send Anyway") { dialog, id -> doConfirm() }
                     setNegativeButton("Cancel") { dialog, id -> dialog.cancel() }
@@ -178,8 +201,10 @@ class SendActivity : AppCompatActivity() {
 
         // Warning if spending more than total
         if (parsedAmt.toDouble() > DataModel.mainResponseData?.maxspendable ?: Double.MAX_VALUE) {
-            showErrorDialog("Can't spend more than ${DataModel.mainResponseData?.tokenName} " +
-                    "${DataModel.mainResponseData?.maxspendable} in a single Tx")
+            showErrorDialog(
+                "Can't spend more than ${DataModel.mainResponseData?.tokenName} " +
+                        "${DataModel.mainResponseData?.maxspendable} in a single Tx"
+            )
             return
         }
 
@@ -200,7 +225,8 @@ class SendActivity : AppCompatActivity() {
     private fun doConfirm() {
         val toAddr = sendAddress.text.toString()
         val amt = amountHUSH.text.toString()
-        val parsedAmt = amt.substring("${DataModel.mainResponseData?.tokenName} ".length, amt.length)
+        val parsedAmt =
+            amt.substring("${DataModel.mainResponseData?.tokenName} ".length, amt.length)
         val memo = txtSendMemo.text.toString() + getReplyToAddressIfChecked(toAddr)
 
         val intent = Intent(this, TxDetailsActivity::class.java)
@@ -212,7 +238,7 @@ class SendActivity : AppCompatActivity() {
         startActivityForResult(intent, REQUEST_CONFIRM)
     }
 
-    private fun getReplyToAddressIfChecked(toAddr: String) : String {
+    private fun getReplyToAddressIfChecked(toAddr: String): String {
         if (chkIncludeReplyTo.isChecked && toAddr.startsWith("zs1")) {
             return "\nReply to:\n${DataModel.mainResponseData?.saplingAddress}"
         } else {
@@ -224,31 +250,31 @@ class SendActivity : AppCompatActivity() {
         val alertDialog = AlertDialog.Builder(this@SendActivity).create()
         alertDialog.setTitle("Error Sending Transaction!")
         alertDialog.setMessage(msg)
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK") {
-                dialog, _ -> dialog.dismiss() }
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK") { dialog, _ -> dialog.dismiss() }
         alertDialog.show()
     }
 
     private fun Double.format(digits: Int): String? = java.lang.String.format("%.${digits}f", this)
 
-    private fun setAmountUSD(amt: Double) {
-        amountUSD.setText(amt.format(2))
-        setAmount(amt / (DataModel.mainResponseData?.zecprice ?: 0.0))
-    }
-
     private fun setAmountHush(amt: Double?) {
-        if (amt == null) {
-            return;
-        }
+        amountHUSH.setText(DecimalFormat("#.########").format(amt))
+        setAmount(amt)
+    }
+                private fun setAmountUSD(amt: Double?) {
+            if (amt == null) {
+                return;
+            }
 
         // Since there is a text-change listner on the USD field, we set the USD first, then override the
         // HUSH field manually.
         val zprice = DataModel.mainResponseData?.zecprice ?: 0.0
-        amountUSD.setText( (zprice * amt).format(2))
+        amountHUSH.setText(DecimalFormat("#.########").format(amt)+ "${DataModel.mainResponseData?.tokenName} ")
 
-        amountHUSH.text =
-            "${DataModel.mainResponseData?.tokenName} " + DecimalFormat("#.########").format(amt)
+        amountUSD.text =
+            (zprice * amt).format(2)
     }
+
+
 
     private fun setAmount(amt: Double?) {
         val zprice = DataModel.mainResponseData?.zecprice
@@ -256,14 +282,15 @@ class SendActivity : AppCompatActivity() {
         if (amt == null) {
             txtSendCurrencySymbol.text = "" // Let the placeholder show the "$" sign
         } else {
-            txtSendCurrencySymbol.text = "$"
+            txtSendCurrencySymbol.text = "HUSH"
         }
 
         if (amt == null || zprice == null)
-            amountHUSH.text = "${DataModel.mainResponseData?.tokenName} 0.0"
-        else
-            amountHUSH.text =
-                "${DataModel.mainResponseData?.tokenName} " + DecimalFormat("#.########").format(amt)
+            amountUSD.text = "0.0"
+        else {
+            amountUSD.text =
+                (zprice * amt).format(2)
+        }
 
     }
 
@@ -274,14 +301,14 @@ class SendActivity : AppCompatActivity() {
                     if (data?.scheme == "hush") {
                         sendAddress.setText(data.data?.host ?: "", TextView.BufferType.EDITABLE)
 
-                        var amt = data.data?.getQueryParameter("amt") ?:
-                        data.data?.getQueryParameter("amount")
+                        var amount = data.data?.getQueryParameter("amount") ?:
+                        data.data?.getQueryParameter("amt")
 
                         // Remove all commas.
-                        amt = amt?.replace(",", ".")
+                        amount = amount?.replace(",", ".")
 
-                        if (amt != null) {
-                            setAmountHush(amt.toDoubleOrNull())
+                        if (amount != null) {
+                            amount.toDoubleOrNull()?.let { setAmountUSD(it) }
                         }
 
                         val memo = data.data?.getQueryParameter("memo")
